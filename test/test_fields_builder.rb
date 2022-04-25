@@ -37,7 +37,7 @@ class TestFieldsBuilder < Minitest::Test
 
   def test_submit
     caption = 'Save changes'
-    target = @fields_builder.submit value: caption
+    target = @fields_builder.submit caption
     assert target.include_opening_tag? 'input'
     assert target.include_tag_attribute? 'name', 'commit'
     assert target.include_tag_attribute? 'type', 'submit'

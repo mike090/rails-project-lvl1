@@ -22,15 +22,15 @@ module HexletCode
       label_tag + input_tag
     end
 
-    def submit(value: 'Save')
-      Tag.build 'input', name: 'commit', type: 'submit', value: value
+    def submit(caption = 'Save')
+      Tag.build 'input', name: 'commit', type: 'submit', value: caption
     end
-
-    private
 
     def label(attribute_name, **tag_attrs)
       Tag.build('label', for: attribute_name, **tag_attrs) { attribute_name.to_s.capitalize }
     end
+
+    private
 
     def textarea(attribute_name, value, cols: 20, rows: 40, **tag_attrs)
       Tag.build('textarea', name: attribute_name, cols: cols, rows: rows, **tag_attrs) { value }
