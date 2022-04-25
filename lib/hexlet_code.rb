@@ -7,4 +7,8 @@ module HexletCode
   class Error < StandardError; end
   # Your code goes here...
   Tag.extend Tag
+
+  def self.form_for(_model, url: '#')
+    Tag.build('form', action: url, method: 'post') {} # rubocop:disable Lint/EmptyBlock
+  end
 end
