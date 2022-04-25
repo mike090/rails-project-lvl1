@@ -9,7 +9,9 @@ module HexletCode
   # Your code goes here...
   Tag.extend Tag
 
-  def self.form_for(_model, url: '#')
-    Tag.build('form', action: url, method: 'post') {} # rubocop:disable Lint/EmptyBlock
+  def self.form_for(model, url: '#', &block)
+    Tag.build('form', action: url, method: 'post') do
+      block.call HexletCode::FieldsBuilder.new(model) if block_given?
+    end
   end
 end

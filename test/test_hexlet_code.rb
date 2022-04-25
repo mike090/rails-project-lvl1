@@ -35,4 +35,10 @@ class TestHexletCode < Minitest::Test
       end
     assert target.include_tag_attribute? 'action', path
   end
+
+  def test_form_for_execute_block_with_field_builder
+    HexletCode.form_for @user do |form|
+      assert_instance_of HexletCode::FieldsBuilder, form
+    end
+  end
 end

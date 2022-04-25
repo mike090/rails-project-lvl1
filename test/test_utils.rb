@@ -12,4 +12,8 @@ class String
   def include_tag_attribute?(attr_name, attr_value)
     include? "#{attr_name}=\"#{attr_value}\""
   end
+
+  def include_tag?(tag_name, **tag_attrs, &block)
+    include? HexletCode::Tag.build(tag_name, **tag_attrs, &block)
+  end
 end
