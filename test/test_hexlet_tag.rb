@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative 'test_utils'
+require 'test_helper'
 
 class TestHexletCode < Minitest::Test
   def tag_subject
