@@ -6,8 +6,6 @@ require_relative 'hexlet_code/fields_builder'
 
 module HexletCode
   class Error < StandardError; end
-  # Your code goes here...
-  Tag.extend Tag
 
   def self.form_for(model, url: '#', &block)
     Tag.build('form', action: url, method: 'post') do
