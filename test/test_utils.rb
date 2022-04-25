@@ -2,7 +2,7 @@
 
 class String
   def include_opening_tag?(tag_name)
-    start_with? "<#{tag_name}"
+    include? "<#{tag_name}"
   end
 
   def include_closing_tag?(tag_name)
