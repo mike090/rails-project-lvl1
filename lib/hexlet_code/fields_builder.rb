@@ -16,7 +16,7 @@ module HexletCode
                           textarea attribute_name, field_value, **tag_attrs)
                   else
                     (
-                          Tag.build 'input', name: attribute_name, type: 'text', value: field_value)
+                          Tag.build 'input', name: attribute_name, type: 'text', value: field_value, **tag_attrs)
                   end
       label_tag = label attribute_name, **tag_attrs
       label_tag + input_tag
