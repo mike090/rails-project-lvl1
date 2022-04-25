@@ -2,6 +2,7 @@
 
 require_relative 'hexlet_code/version'
 require_relative 'hexlet_code/tag'
+require_relative 'hexlet_code/fields_builder'
 
 module HexletCode
   class Error < StandardError; end
