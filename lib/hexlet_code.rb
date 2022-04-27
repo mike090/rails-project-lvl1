@@ -6,10 +6,15 @@ require_relative 'hexlet_code/fields_builder'
 
 module HexletCode
   class Error < StandardError; end
+  extend self
 
-  def self.form_for(model, url: '#', &block)
+  attr_accessor :content_builder
+
+  @content_builder = HexletCode::FieldsBuilder
+
+  def form_for(model, url: '#', &block)
     Tag.build('form', action: url, method: 'post') do
-      block.call HexletCode::FieldsBuilder.new(model) if block_given?
+      block.call content_builder.new(model) if block_given?
     end
   end
 end

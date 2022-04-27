@@ -22,7 +22,7 @@ module HexletCode
       label_tag + input_tag
     end
 
-    def submit(caption = 'Save')
+    def submit(caption = 'Save', **tag_attrs)
       Tag.build 'input', name: 'commit', type: 'submit', value: caption
     end
 
