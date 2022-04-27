@@ -23,7 +23,8 @@ module HexletCode
     end
 
     def submit(caption = 'Save', **tag_attrs)
-      Tag.build 'input', name: 'commit', type: 'submit', value: caption
+      tag_attrs = { name: 'commit', type: 'submit', value: caption }.merge tag_attrs
+      Tag.build 'input', **tag_attrs
     end
 
     def label(attribute_name, **tag_attrs)

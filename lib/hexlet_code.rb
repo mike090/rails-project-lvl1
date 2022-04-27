@@ -6,7 +6,7 @@ require_relative 'hexlet_code/fields_builder'
 
 module HexletCode
   class Error < StandardError; end
-  extend self
+  extend self # rubocop:disable Style/ModuleFunction
 
   attr_accessor :content_builder
 
