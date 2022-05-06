@@ -8,15 +8,16 @@ module HexletCode
       @model = model
     end
 
-    def input(attribute_name, **tag_attrs)
+    def input(attribute_name, **input_attrs)
       field_value = @model.public_send attribute_name
+      tag_attrs = input_attrs
       as = tag_attrs.delete :as
       input_tag = if as == :text
                     (
                           textarea attribute_name, field_value, **tag_attrs)
                   else
                     (
-                          Tag.build 'input', name: attribute_name, type: 'text', value: field_value, **tag_attrs)
+                          Tag.build 'input', name: attribute_name, type: 'text', value: field_value.to_s, **tag_attrs)
                   end
       label_tag = label attribute_name, **tag_attrs
       label_tag + input_tag

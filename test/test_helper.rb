@@ -6,7 +6,6 @@ require 'hexlet_code'
 require 'minitest/autorun'
 require 'minitest-power_assert'
 require_relative 'user'
-# require_relative 'test_utils'
 
 def assert_start_with_opening_tag(target, tag_name)
   assert target.start_with?("<#{tag_name}"), "#{target} should start with <#{tag_name}"
@@ -28,12 +27,12 @@ def assert_include_tag_attribute(target, attr_name, attr_value)
   assert target.include?("#{attr_name}=\"#{attr_value}\""), "#{target} should include #{attr_name}=\"#{attr_value}\""
 end
 
-def assert_include_tag(target, tag_name, **attrs, &block)
+def assert_include_tag(target, tag_name, **attrs)
   assert_include_opening_tag target, tag_name
   assert_include_closing_tag target, tag_name if block_given?
   attrs.each { |attr, value| assert_include_tag_attribute target, attr, value }
   return unless block_given?
 
-  block_result = block.call
+  block_result = yield
   assert target.include?(block_result), "#{target} should include <#{block_result}"
 end

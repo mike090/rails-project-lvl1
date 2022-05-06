@@ -4,15 +4,24 @@ module HexletCode
   module Tag
     extend self
 
-    @indent = 0
+    @block_flag = 0
+
+    VOID_TAGS = %w[area base br col command embed ht img input keygen link meta param source track wbr].freeze
+
+    private_constant :VOID_TAGS
 
     def build(tag_name, **attrs, &block)
-      raise ArgumentError if tag_name.strip.empty?
+      raise ArgumentError, 'Empty tag name' if tag_name.strip.empty?
 
-      tag = "#{tag_open tag_name, **attrs}" \
-            "#{execute_block(&block) if block_given?}" \
-            "#{tag_close tag_name if block_given?}"
-      if @indent.positive?
+      tag_parts = []
+      tag_parts << tag_open(tag_name, **attrs)
+      unless void_tag? tag_name
+        tag_parts << execute_block(&block) if block_given?
+        tag_parts << "</#{tag_name}>"
+      end
+      tag = tag_parts.join
+
+      if @block_flag.positive?
         if @block_buffer
           @block_buffer.concat tag
         else
@@ -25,26 +34,29 @@ module HexletCode
     private
 
     def tag_open(tag_name, **attrs)
-      attr_str = attrs.inject('') { |str, (k, v)| "#{str} #{k}=\"#{v}\"" }
-      "<#{tag_name}#{attr_str}>"
+      attrs_str = attrs.inject('') do |result, (k, v)|
+        attr_str = v ? "#{k}=\"#{v}\"" : "#{k}"
+        "#{result} #{attr_str}"
+      end
+      "<#{tag_name}#{attrs_str}>"
     end
 
-    def execute_block(&block)
-      @indent += 1
+    def execute_block
+      @block_flag += 1
       begin
         tmp_buffer = @block_buffer
         @block_buffer = nil
-        block_result = block.call
+        block_result = yield
         block_result = @block_buffer if @block_buffer
       ensure
         @block_buffer = tmp_buffer
-        @indent -= 1
+        @block_flag -= 1
       end
       block_result.instance_of?(String) ? block_result : nil
     end
 
-    def tag_close(tag_name)
-      "</#{tag_name}>"
+    def void_tag?(tag_name)
+      VOID_TAGS.include? tag_name
     end
   end
 end
