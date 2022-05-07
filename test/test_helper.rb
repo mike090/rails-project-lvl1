@@ -5,7 +5,8 @@ require 'hexlet_code'
 
 require 'minitest/autorun'
 require 'minitest-power_assert'
-require_relative 'user'
+
+User = Struct.new(:name, :job, :gender, keyword_init: true)
 
 def assert_start_with_opening_tag(target, tag_name)
   assert target.start_with?("<#{tag_name}"), "#{target} should start with <#{tag_name}"

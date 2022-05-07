@@ -4,8 +4,14 @@ require_relative 'hexlet_code/version'
 
 module HexletCode
   autoload :Tag, 'hexlet_code/tag.rb'
-  autoload :FieldsBuilder, 'hexlet_code/fields_builder'
-  autoload :Form, 'hexlet_code/form.rb' 
+  autoload :Form, 'hexlet_code/form.rb'
+  autoload :FieldsBuilder, 'hexlet_code/fields_builder.rb'
+  # autoload :ControlsBuilder, 'hexlet_code/controls_builder.rb'
+  autoload :HtmlControls, 'hexlet_code/html_controls.rb'
+
+  FIELD_NAME_KEY = 'model@field_name'
+  FIELD_VALUE_KEY = 'model@field_value'
+  FORM_CONTROLS_KEY = 'form@controls'
 
   extend self # rubocop:disable Style/ModuleFunction
 

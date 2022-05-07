@@ -9,23 +9,50 @@ module HexletCode
     end
 
     def structure
-      @form_attrs.merge controls: @controls
+      { form: @form_attrs.merge(FORM_CONTROLS_KEY => @controls) }
     end
 
-    def input(field_name, **attrs)
-      field_value = @model.public_send field_name
-      input_attrs = attrs.merge field_name: field_name, field_value: field_value
-      add_control :input, **input_attrs 
+    def method_missing(method_name, *args)
+      check_control_args(*args)
+      control_args = args.last.instance_of?(Hash) ? args.last : {}
+      if args.first.instance_of? Symbol
+        field_name = args.first
+        field_value = @model.public_send field_name
+        control_args[FIELD_NAME_KEY] = field_name
+        control_args[FIELD_VALUE_KEY] = field_value
+      end
+      add_control method_name, **control_args
     end
 
-    def submit(**attrs)
-      add_control :submit, **attrs
+    def respond_to_missing?(*)
+      true
     end
 
     private
 
+    def check_control_args(*args)
+      return if args.empty?
+
+      pattern = args.map(&:class)
+      return if pattern == [Hash]
+
+      if [[Symbol], [Symbol, Hash]].include?(pattern)
+        check_field_name args.first
+        return
+      end
+      raise ArgumentError,
+            "Invalid control arguments #{args}. Use (_field_name, **args)"
+    end
+
+    def check_field_name(field_name)
+      return if @model.respond_to? field_name
+
+      raise NoMethodError,
+            "Invalid field name '#{field_name}' for model:#{@model.inspect}"
+    end
+
     def add_control(control_type, **attrs)
-      @controls << { form_control: control_type, **attrs}
+      @controls << { control_type => attrs }
     end
   end
 end

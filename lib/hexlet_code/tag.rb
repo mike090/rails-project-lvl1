@@ -11,7 +11,7 @@ module HexletCode
     private_constant :VOID_TAGS
 
     def build(tag_name, **attrs, &block)
-      raise ArgumentError, 'Empty tag name' if tag_name.strip.empty?
+      raise ArgumentError, 'Empty tag name' if tag_name.to_s.strip.empty?
 
       tag_parts = []
       tag_parts << tag_open(tag_name, **attrs)
@@ -35,7 +35,7 @@ module HexletCode
 
     def tag_open(tag_name, **attrs)
       attrs_str = attrs.inject('') do |result, (k, v)|
-        attr_str = v ? "#{k}=\"#{v}\"" : "#{k}"
+        attr_str = v ? "#{k}=\"#{v}\"" : k.to_s
         "#{result} #{attr_str}"
       end
       "<#{tag_name}#{attrs_str}>"
