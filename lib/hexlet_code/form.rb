@@ -33,15 +33,13 @@ module HexletCode
     def check_control_args(*args)
       return if args.empty?
 
-      pattern = args.map(&:class)
-      return if pattern == [Hash]
-
-      if [[Symbol], [Symbol, Hash]].include?(pattern)
-        check_field_name args.first
-        return
-      end
+      params_map = args.map(&:class)
       raise ArgumentError,
-            "Invalid control arguments #{args}. Use (_field_name, **args)"
+            "Invalid control arguments #{args}. Use (_field_name, **args)" unless
+
+      [[Symbol], [Hash], [Symbol, Hash]].include? params_map
+            
+      check_field_name args.first if params_map.first == Symbol      
     end
 
     def check_field_name(field_name)
