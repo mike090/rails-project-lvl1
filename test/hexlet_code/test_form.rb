@@ -3,6 +3,14 @@
 require 'test_helper'
 
 class TestForm < Minitest::Test
+  def type_key
+    HexletCode::CONTROL_TYPE_KEY
+  end
+
+  def attrs_key
+    HexletCode::CONTROL_ATTRS_KEY
+  end
+
   def model
     @model ||= User.new name: 'Rob'
   end
@@ -15,13 +23,15 @@ class TestForm < Minitest::Test
 
   def test_form_keep_control
     form = HexletCode::Form.new model
-    form.test_control
-    form.test_control attr1: :value1, attr2: :value2
+    form.test_control1
+    form.test_control2 attr1: :value1, attr2: :value2
     form_data = form.structure[:form]
     assert form_data[HexletCode::FORM_CONTROLS_KEY].count == 2
-    assert form_data[HexletCode::FORM_CONTROLS_KEY].include?({ test_control: {} }),
+    assert form_data[HexletCode::FORM_CONTROLS_KEY].include?({ type_key => :test_control1, attrs_key => {} }),
            "#{form_data} :controls should include '{test_control: {}}'"
-    assert form_data[HexletCode::FORM_CONTROLS_KEY].include?({ test_control: { attr1: :value1, attr2: :value2 } }),
+    assert form_data[HexletCode::FORM_CONTROLS_KEY].include?(
+      { type_key => :test_control2, attrs_key => { attr1: :value1, attr2: :value2 } }
+    ),
            "#{form_data} :controls should include '{test_control: {attr1: :value1, attr2: :value2}}'"
   end
 
@@ -39,7 +49,7 @@ class TestForm < Minitest::Test
     field_value = @model.name
     form.test_control field_name, attr1: :value1
     form_data = form.structure[:form]
-    test_control_data = form_data[HexletCode::FORM_CONTROLS_KEY].first[:test_control]
+    test_control_data = form_data[HexletCode::FORM_CONTROLS_KEY].first
     assert test_control_data[HexletCode::FIELD_NAME_KEY] = field_name
     assert test_control_data[HexletCode::FIELD_VALUE_KEY] = field_value
     assert test_control_data[:attr1] = :value1

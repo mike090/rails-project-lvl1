@@ -3,14 +3,8 @@
 require 'test_helper'
 
 class TestHtmlControls < Minitest::Test
-  def create_html_controls
-    html_controls_class = Class.new
-    html_controls_class.include HexletCode::HtmlControls
-    html_controls_class.new
-  end
-
   def html_controls
-    @html_controls ||= create_html_controls
+    HexletCode::HtmlControls
   end
 
   def test_label

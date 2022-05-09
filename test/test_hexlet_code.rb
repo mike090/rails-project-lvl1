@@ -13,14 +13,14 @@ class TestHexletCode < Minitest::Test
 
   def test_form_for_return_string_result
     # assert_instance_of String, (
-    #   HexletCode.form_for @user do |form| # rubocop:disable Lint/EmptyBlock
+    #   HexletCode.form_for @user do |form|
     #   end
     # )
   end
 
   def test_form_for_return_form_tag
     # target =
-    #   HexletCode.form_for @user do |form| # rubocop:disable Lint/EmptyBlock
+    #   HexletCode.form_for @user do |form|
     #   end
     # assert_start_with_opening_tag target, 'form'
     # assert_end_with_closing_tag target, 'form'
@@ -31,7 +31,7 @@ class TestHexletCode < Minitest::Test
   def test_form_for_process_url_param
     # path = '/users'
     # target =
-    #   HexletCode.form_for @user, url: path do |form| # rubocop:disable Lint/EmptyBlock
+    #   HexletCode.form_for @user, url: path do |form|
     #   end
     # assert_include_tag_attribute target, 'action', path
   end

@@ -67,35 +67,35 @@ class TestHexletCode < Minitest::Test
   def test_hexlet_n2
     target = HexletCode::Tag.build('img', src: 'path/to/image')
     assert do
-      target = '<img src="path/to/image">'
+      target == '<img src="path/to/image">'
     end
   end
 
   def test_hexlet_n3
     target = HexletCode::Tag.build('input', type: 'submit', value: 'Save')
     assert do
-      target = '<input type="submit" value="Save">'
+      target == '<input type="submit" value="Save">'
     end
   end
 
   def test_hexlet_n4
     target = HexletCode::Tag.build('label') { 'Email' }
     assert do
-      target = '<label>Email</label>'
+      target == '<label>Email</label>'
     end
   end
 
   def test_hexlet_n5
     target = HexletCode::Tag.build('label', for: 'email') { 'Email' }
     assert do
-      target = '<label for="email">Email</label>'
+      target == '<label for="email">Email</label>'
     end
   end
 
   def test_hexlet_n6
     target = HexletCode::Tag.build('div') {} # rubocop:disable Lint/EmptyBlock
     assert do
-      target = '<div></div>'
+      target == '<div></div>'
     end
   end
 

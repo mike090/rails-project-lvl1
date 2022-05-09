@@ -13,15 +13,11 @@ module HexletCode
     end
 
     def method_missing(method_name, *args)
-      check_control_args(*args)
-      control_args = args.last.instance_of?(Hash) ? args.last : {}
-      if args.first.instance_of? Symbol
-        field_name = args.first
-        field_value = @model.public_send field_name
-        control_args[FIELD_NAME_KEY] = field_name
-        control_args[FIELD_VALUE_KEY] = field_value
-      end
-      add_control method_name, **control_args
+      check_control_args(args)
+      field_name = args.first if args.first.instance_of? Symbol
+      control_attrs = args.last if args.last.instance_of? Hash
+      control_attrs ||= {}
+      add_control method_name, field_name, control_attrs
     end
 
     def respond_to_missing?(*)
@@ -30,16 +26,16 @@ module HexletCode
 
     private
 
-    def check_control_args(*args)
+    def check_control_args(args)
       return if args.empty?
 
       params_map = args.map(&:class)
-      raise ArgumentError,
-            "Invalid control arguments #{args}. Use (_field_name, **args)" unless
+      unless [[Symbol], [Hash], [Symbol, Hash]].include? params_map
+        raise ArgumentError,
+              "Invalid control arguments #{args}. Use (_field_name, **args)"
+      end
 
-      [[Symbol], [Hash], [Symbol, Hash]].include? params_map
-            
-      check_field_name args.first if params_map.first == Symbol      
+      check_field_name args.first if params_map.first == Symbol
     end
 
     def check_field_name(field_name)
@@ -49,8 +45,13 @@ module HexletCode
             "Invalid field name '#{field_name}' for model:#{@model.inspect}"
     end
 
-    def add_control(control_type, **attrs)
-      @controls << { control_type => attrs }
+    def add_control(control_type, field_name, attrs)
+      control = { HexletCode::CONTROL_TYPE_KEY => control_type, HexletCode::CONTROL_ATTRS_KEY => attrs }
+      if field_name
+        field_value = @model.public_send field_name
+        control.merge! FIELD_NAME_KEY => field_name, FIELD_VALUE_KEY => field_value
+      end
+      @controls << control
     end
   end
 end

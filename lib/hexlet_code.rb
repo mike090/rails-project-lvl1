@@ -5,19 +5,24 @@ require_relative 'hexlet_code/version'
 module HexletCode
   autoload :Tag, 'hexlet_code/tag.rb'
   autoload :Form, 'hexlet_code/form.rb'
-  # autoload :FieldsBuilder, 'hexlet_code/fields_builder.rb'
-  # autoload :ControlsBuilder, 'hexlet_code/controls_builder.rb'
+  autoload :Renderer, 'hexlet_code/renderer.rb'
   autoload :HtmlControls, 'hexlet_code/html_controls.rb'
 
-  FIELD_NAME_KEY = 'model@field_name'
-  FIELD_VALUE_KEY = 'model@field_value'
-  FORM_CONTROLS_KEY = 'form@controls'
+  CONTROL_TYPE_KEY = :type
+  CONTROL_ATTRS_KEY = :attributes
+  FIELD_NAME_KEY = :field_name
+  FIELD_VALUE_KEY = :field_value
+  FORM_CONTROLS_KEY = '@controls'
 
-  extend self # rubocop:disable Style/ModuleFunction
+  def self.register_html_controls
+    HtmlControls.singleton_methods.each do |method_name|
+      Renderer.register_control method_name, (HtmlControls.method method_name).to_proc
+    end
+  end
+
+  # extend self
 
   attr_accessor :content_builder
-
-  # @content_builder = HexletCode::FieldsBuilder
 
   def form_for(model, **attrs)
     # form_attrs = { url: '#', method: :post }.merge attrs
@@ -26,4 +31,6 @@ module HexletCode
     #   yield content_builder.new(model) if block_given?
     # end
   end
+
+  register_html_controls
 end

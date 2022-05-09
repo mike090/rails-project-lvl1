@@ -6,6 +6,8 @@ require 'hexlet_code'
 require 'minitest/autorun'
 require 'minitest-power_assert'
 
+require 'byebug'
+
 User = Struct.new(:name, :job, :gender, keyword_init: true)
 
 def assert_start_with_opening_tag(target, tag_name)
