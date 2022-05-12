@@ -25,7 +25,7 @@ module HexletCode
         when Controls::TextControl
           text = control.text
         else
-          text = ""
+          text = ''
         end
         Html.text_input text, **attrs
       end
@@ -54,13 +54,13 @@ module HexletCode
       end
 
       def submit(control)
-        case control
-        when Controls::TextControl
-          caption = control.text
-        else
-          caption = control.attributes[:value] || 'Save'
-        end
-        tag_attrs = { name: :commit}.merge control.attributes
+        caption = case control
+                  when Controls::TextControl
+                    control.text
+                  else
+                    control.attributes[:value] || 'Save'
+                  end
+        tag_attrs = { name: :commit }.merge control.attributes
         Html.submit(caption, **tag_attrs.merge(type: :submit))
       end
     end

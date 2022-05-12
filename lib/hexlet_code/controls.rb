@@ -3,7 +3,7 @@
 module HexletCode
   module Controls
     CONTROL_KEYS = %i[attributes].freeze
-    TEXT_KEYS = (%i(text) + CONTROL_KEYS).freeze
+    TEXT_KEYS = (%i[text] + CONTROL_KEYS).freeze
     DATA_KEYS = (%i[field_name field_value] + CONTROL_KEYS).freeze
     FORM_KEYS = (%i[model controls] + CONTROL_KEYS).freeze
 

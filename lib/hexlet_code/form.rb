@@ -38,7 +38,7 @@ module HexletCode
       return if args.empty?
 
       params_map = args.map(&:class)
-      unless [[String], [Symbol], [Hash], [String,Hash], [Symbol, Hash]].include? params_map
+      unless [[String], [Symbol], [Hash], [String, Hash], [Symbol, Hash]].include? params_map
         raise ArgumentError,
               "Invalid control arguments #{args}. Use (_field_name|_text, **args)"
       end
@@ -60,14 +60,14 @@ module HexletCode
 
     def add_text_control(control_type, text, **attrs)
       control = HexletCode::Controls::TextControl.new(**{ type: control_type,
-                                                             data: { text: text, attributes: attrs } })
+                                                          data: { text: text, attributes: attrs } })
       @data.controls << control
     end
 
     def add_data_control(control_type, field_name, **attrs)
       @data.model[field_name] = @model.public_send field_name unless @data.model.key? field_name
       control = HexletCode::Controls::DataControl.new(**{ type: control_type,
-                                                             data: { field_name: field_name, attributes: attrs } })
+                                                          data: { field_name: field_name, attributes: attrs } })
       @data.controls << control
     end
   end
