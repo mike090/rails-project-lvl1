@@ -3,47 +3,49 @@
 module HexletCode
   module HtmlControls
     class << self
-      def label(**attrs)
-        label_attrs = attrs
-        label_field = label_attrs.delete FIELD_NAME_KEY
-        label_text = label_attrs.delete FIELD_VALUE_KEY
-        label_attrs[:for] = label_field if label_field
-        Tag.build('label', **label_attrs) { label_text }
+      def label(control)
+        attrs = control.attributes.dup
+        if control.instance_of? Controls::ModelControl
+          attrs[:for] = control.field_name
+          text = control.field_name.to_s.capitalize
+        end
+        Html.label text, **attrs
       end
 
-      def text_input(**attrs)
-        tag_attrs = attrs.merge type: :text
-        field_name = tag_attrs.delete FIELD_NAME_KEY
-        field_value = tag_attrs.delete FIELD_VALUE_KEY
-        tag_attrs.merge! name: field_name if field_name
-        tag_attrs.merge! value: field_value if field_value
-        Tag.build 'input', **tag_attrs
+      def text_input(control)
+        attrs = control.attributes.merge type: :text
+        attrs.delete :as
+        text = ''
+        if control.instance_of? Controls::ModelControl
+          attrs.merge! name: control.field_name
+          text = control.field_value
+        end
+        Html.text_input text, **attrs
       end
 
-      def form(**attrs)
-        tag_attrs = attrs
-        tag_attrs[:action] = tag_attrs.delete :url
-        controls = (tag_attrs.delete FORM_CONTROLS_KEY) || []
-        form_content = controls.map do |control_data|
-          control_name = control.keys.first
-          control_attrs = control_data[control_name]
-          ControlsBuilder.build_control control_name, control_attrs
-        end.join
-        Tag.build('form', **tag_attrs) { form_content }
+      def textarea(control)
+        attrs = { cols: 20, rows: 40 }.merge control.attributes
+        if control.instance_of? Controls::ModelControl
+          attrs.merge! name: control.field_name
+          text = control.field_value
+        end
+        Html.textarea text, **attrs
       end
 
-      def textarea(**attrs)
-        tag_attrs = { cols: 20, rows: 40 }.merge attrs
-        field_name = tag_attrs.delete FIELD_NAME_KEY
-        field_value = tag_attrs.delete FIELD_VALUE_KEY
-        tag_attrs.merge! name: field_name if field_name
-        Tag.build('textarea', **tag_attrs) { field_value }
+      def form(form)
+        attrs = { method: :post }.merge form.attributes
+        attrs[:action] = (attrs.delete :url) || '#'
+        # controls = form.controls.map
+        form_content = form.controls.map do |control|
+          control.field_value = form.model[control.field_name] if control.instance_of? Controls::ModelControl
+          Rendering.render_control control
+        end
+        Html.form form_content.join, **attrs
       end
 
-      def submit(**attrs)
-        tag_attrs = { name: :commit, value: :Save }.merge attrs
-        tag_attrs.merge! type: :submit
-        Tag.build 'input', **tag_attrs
+      def submit(control)
+        tag_attrs = { name: :commit, value: :Save }.merge control.attributes
+        Html.submit(**tag_attrs.merge(type: :submit))
       end
     end
   end

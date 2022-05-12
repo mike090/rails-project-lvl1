@@ -2,14 +2,21 @@
 
 module HexletCode
   class Form
-    def initialize(model, url: '#', **attrs)
+    extend Forwardable
+
+    def_delegators :@data,
+                   *(Controls::FormControl.public_instance_methods - public_instance_methods).grep(
+                     /#{(Controls::FormControl.data_class.members << :data).join '|'}/
+                   )
+
+    def initialize(model, **attrs)
       @model = model
-      @form_attrs = attrs.merge({ url: url })
-      @controls = []
+      @data = HexletCode::Controls::FormControl.new(**{ type: :form, data: { attributes: attrs } })
+      # @data = ControlData.new model: {}, controls: [], attributes: attrs
     end
 
-    def structure
-      { form: @form_attrs.merge(FORM_CONTROLS_KEY => @controls) }
+    def respond_to_missing?(*)
+      true
     end
 
     def method_missing(method_name, *args)
@@ -17,11 +24,7 @@ module HexletCode
       field_name = args.first if args.first.instance_of? Symbol
       control_attrs = args.last if args.last.instance_of? Hash
       control_attrs ||= {}
-      add_control method_name, field_name, control_attrs
-    end
-
-    def respond_to_missing?(*)
-      true
+      add_control method_name, field_name, **control_attrs
     end
 
     private
@@ -45,13 +48,15 @@ module HexletCode
             "Invalid field name '#{field_name}' for model:#{@model.inspect}"
     end
 
-    def add_control(control_type, field_name, attrs)
-      control = { HexletCode::CONTROL_TYPE_KEY => control_type, HexletCode::CONTROL_ATTRS_KEY => attrs }
+    def add_control(control_type, field_name, **attrs)
       if field_name
-        field_value = @model.public_send field_name
-        control.merge! FIELD_NAME_KEY => field_name, FIELD_VALUE_KEY => field_value
+        @data.model[field_name] = @model.public_send field_name unless @data.model.key? field_name
+        control = HexletCode::Controls::ModelControl.new(**{ type: control_type,
+                                                             data: { field_name: field_name, attributes: attrs } })
+      else
+        control = HexletCode::Controls::Control.new(**{ type: control_type, data: { attributes: attrs } })
       end
-      @controls << control
+      @data.controls << control
     end
   end
 end

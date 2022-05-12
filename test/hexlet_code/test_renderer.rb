@@ -2,27 +2,27 @@
 
 require 'test_helper'
 
-class TestControlsBuilder < Minitest::Test
+class TestRenderer < Minitest::Test
   def renderer
-    HexletCode::Renderer
+    HexletCode::Rendering
   end
 
-  def test_controls_builder_accepts_proc
+  def test_renderer_accepts_proc
     control_name = :test_control
     control_render = 'test_control'
-    control_builder = proc { control_render }
+    control_builder = proc { |_control_data| control_render }
     renderer.register_control control_name, control_builder
-    target = renderer.render_control control_name
+    target = renderer.render_control(HexletCode::Controls::Control.new(type: control_name))
     assert { target == control_render }
   end
 
-  def test_controls_builder_accepts_build
+  def test_renderer_accepts_build
     control_name = :test_control
-    control_render = 'test_control'
+    control_render = 'test_control2'
     control_builder = Object.new
-    control_builder.define_singleton_method(:build) { control_render }
+    control_builder.define_singleton_method(:build) { |_control_data| control_render }
     renderer.register_control control_name, control_builder
-    target = renderer.render_control control_name
+    target = renderer.render_control(HexletCode::Controls::Control.new(type: control_name))
     assert { target == control_render }
   end
 

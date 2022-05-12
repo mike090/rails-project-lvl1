@@ -1,22 +1,24 @@
 # frozen_string_literal: true
 
 module HexletCode
-  class InvalidBuilderError < StandardError; end
+  class RenderError < StandardError; end
 
-  module Renderer
+  module Rendering
     class << self
       def register_control(control_name, builder)
         check_builder builder
         builders[control_name] = builder
       end
 
-      def render_control(control_name, **attrs)
-        builder = builders[control_name]
-        raise ArgumentError, "Unknown contril :#{control_name}" unless builder
-        return builder.build(**attrs) if builder.respond_to? :build
-        return builder.call(**attrs) if builder.instance_of? Proc
+      def render_control(control)
+        builder = builders[control.type]
+        raise RenderError, "Unknown contril type: #{control.type}" unless builder
+        return builder.build(control) if builder.respond_to? :build
+        return builder.call(control) if builder.instance_of? Proc
+      end
 
-        raise HexletCode::InvalidBuilderError, "Invalid builder for #{control_name}"
+      def registred_controls
+        @builders.keys
       end
 
       private
