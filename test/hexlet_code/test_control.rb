@@ -4,10 +4,10 @@ require 'test_helper'
 
 class TestControl < Minitest::Test
   def test_control
-    control = HexletCode::Controls::ModelControl.new(type: :test_control)
+    control = HexletCode::Controls::DataControl.new(type: :test_control)
     control.field_name = :job
     control.attributes[:as] = :text
-    target = HexletCode::Controls::ModelControl.new(**control.data)
+    target = HexletCode::Controls::DataControl.new(**control.data)
     assert { target.type == :test_control }
     assert { target.field_name == :job }
     assert { target.attributes == { as: :text } }

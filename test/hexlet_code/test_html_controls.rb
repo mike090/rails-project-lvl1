@@ -8,7 +8,7 @@ class TestHtmlControls < Minitest::Test
   end
 
   def data_control
-    @data_control ||= HexletCode::Controls::ModelControl.new type: :control
+    @data_control ||= HexletCode::Controls::DataControl.new type: :control
   end
 
   def control
@@ -49,7 +49,7 @@ class TestHtmlControls < Minitest::Test
 
   def test_submit
     target = html_controls.submit control
-    assert { target == '<input name="commit" value="Save" type="submit">' }
+    assert { target == '<input name="commit" type="submit" value="Save">' }
     target = html_controls.submit(control.tap do |control|
       control.attributes[:value] = 'Save changes'
     end)

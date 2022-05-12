@@ -19,8 +19,8 @@ module HexletCode
         Tag.build('textarea', **attrs) { text }
       end
 
-      def submit(**attrs)
-        Tag.build 'input', **attrs.merge(type: :submit)
+      def submit(caption, **attrs)
+        Tag.build 'input', **attrs.merge(value: caption)
       end
     end
   end

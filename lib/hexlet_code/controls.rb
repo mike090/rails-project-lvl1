@@ -2,17 +2,18 @@
 
 module HexletCode
   module Controls
-    CONTROL_DATA_KEYS = %i[attributes].freeze
-    MODEL_DATA_KEYS = (%i[field_name field_value] + CONTROL_DATA_KEYS).freeze
-    FORM_DATA_KEYS = (%i[model controls] + CONTROL_DATA_KEYS).freeze
+    CONTROL_KEYS = %i[attributes].freeze
+    TEXT_KEYS = (%i(text) + CONTROL_KEYS).freeze
+    DATA_KEYS = (%i[field_name field_value] + CONTROL_KEYS).freeze
+    FORM_KEYS = (%i[model controls] + CONTROL_KEYS).freeze
 
-    private_constant :CONTROL_DATA_KEYS, :MODEL_DATA_KEYS, :FORM_DATA_KEYS
+    private_constant :CONTROL_KEYS, :DATA_KEYS, :FORM_KEYS, :TEXT_KEYS
 
     class Control
       extend Forwardable
 
       def self.data_class
-        @data_class ||= Struct.new(*CONTROL_DATA_KEYS, keyword_init: true) do |_struct_class|
+        @data_class ||= Struct.new(*CONTROL_KEYS, keyword_init: true) do |_struct_class|
           def to_h
             super.tap { |result| result[:attributes] = result[:attributes].dup }
           end
@@ -42,12 +43,11 @@ module HexletCode
                        .grep(/#{data_class.members.join '|'}/)
     end
 
-    class ModelControl < Control
+    class DataControl < Control
       def self.data_class
-        @data_class ||= Struct.new(*MODEL_DATA_KEYS, keyword_init: true) do |_struct_class|
-          def initialize(**values)
-            super
-            self[:attributes] ||= {}
+        @data_class ||= Struct.new(*DATA_KEYS, keyword_init: true) do |_struct_class|
+          def to_h
+            super.tap { |result| result[:attributes] = result[:attributes].dup }
           end
 
           private :attributes=
@@ -61,7 +61,7 @@ module HexletCode
 
     class FormControl < Control
       def self.data_class
-        @data_class ||= Struct.new(*FORM_DATA_KEYS, keyword_init: true) do |_struct_class|
+        @data_class ||= Struct.new(*FORM_KEYS, keyword_init: true) do |_struct_class|
           def to_h
             super.tap do |result|
               result[:model] = result[:model].dup
@@ -80,6 +80,22 @@ module HexletCode
         controls = (data[:controls] || []).map { |control_data| Controls.create_control(**control_data) }
         attributes = data[:attributes]
         super(**{ type: type, data: { attributes: attributes, model: model, controls: controls } })
+      end
+
+      def_delegators :@data,
+                     *(data_class.public_instance_methods - public_instance_methods)
+                       .grep(/#{data_class.members.join '|'}/)
+    end
+
+    class TextControl < Control
+      def self.data_class
+        @data_class ||= Struct.new(*TEXT_KEYS, keyword_init: true) do |_struct_class|
+          def to_h
+            super.tap { |result| result[:attributes] = result[:attributes].dup }
+          end
+
+          private :attributes=
+        end
       end
 
       def_delegators :@data,
@@ -110,8 +126,9 @@ module HexletCode
       private :get_control_class, :control_classes
     end
 
-    register_control_class Control, *CONTROL_DATA_KEYS
-    register_control_class ModelControl, *MODEL_DATA_KEYS
-    register_control_class FormControl, *FORM_DATA_KEYS
+    register_control_class Control, *CONTROL_KEYS
+    register_control_class DataControl, *DATA_KEYS
+    register_control_class FormControl, *FORM_KEYS
+    register_control_class TextControl, *TEXT_KEYS
   end
 end

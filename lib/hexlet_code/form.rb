@@ -21,10 +21,15 @@ module HexletCode
 
     def method_missing(method_name, *args)
       check_control_args(args)
-      field_name = args.first if args.first.instance_of? Symbol
-      control_attrs = args.last if args.last.instance_of? Hash
-      control_attrs ||= {}
-      add_control method_name, field_name, **control_attrs
+      control_attrs = args.last.instance_of?(Hash) ? args.last : {}
+      case args.first
+      when Symbol
+        add_data_control method_name, args.first, **control_attrs
+      when String
+        add_text_control method_name, args.first, **control_attrs
+      else
+        add_control method_name, **control_attrs
+      end
     end
 
     private
@@ -33,9 +38,9 @@ module HexletCode
       return if args.empty?
 
       params_map = args.map(&:class)
-      unless [[Symbol], [Hash], [Symbol, Hash]].include? params_map
+      unless [[String], [Symbol], [Hash], [String,Hash], [Symbol, Hash]].include? params_map
         raise ArgumentError,
-              "Invalid control arguments #{args}. Use (_field_name, **args)"
+              "Invalid control arguments #{args}. Use (_field_name|_text, **args)"
       end
 
       check_field_name args.first if params_map.first == Symbol
@@ -48,14 +53,21 @@ module HexletCode
             "Invalid field name '#{field_name}' for model:#{@model.inspect}"
     end
 
-    def add_control(control_type, field_name, **attrs)
-      if field_name
-        @data.model[field_name] = @model.public_send field_name unless @data.model.key? field_name
-        control = HexletCode::Controls::ModelControl.new(**{ type: control_type,
+    def add_control(control_type, **attrs)
+      control = HexletCode::Controls::Control.new(**{ type: control_type, data: { attributes: attrs } })
+      @data.controls << control
+    end
+
+    def add_text_control(control_type, text, **attrs)
+      control = HexletCode::Controls::TextControl.new(**{ type: control_type,
+                                                             data: { text: text, attributes: attrs } })
+      @data.controls << control
+    end
+
+    def add_data_control(control_type, field_name, **attrs)
+      @data.model[field_name] = @model.public_send field_name unless @data.model.key? field_name
+      control = HexletCode::Controls::DataControl.new(**{ type: control_type,
                                                              data: { field_name: field_name, attributes: attrs } })
-      else
-        control = HexletCode::Controls::Control.new(**{ type: control_type, data: { attributes: attrs } })
-      end
       @data.controls << control
     end
   end

@@ -36,7 +36,7 @@ class TestHexletCode < Minitest::Test
     target = HexletCode.form_for @user do |form|
       form.input :name
       form.input :job, as: :text
-      form.submit
+      form.submit 'It works!'
     end
     assert_start_with_opening_tag target, 'form'
     assert_end_with_closing_tag target, 'form'
@@ -44,6 +44,6 @@ class TestHexletCode < Minitest::Test
     assert_include_tag target, 'input', name: 'name', type: 'text', value: @user.name
     assert_include_tag(target, 'label', for: 'job') { 'Job' }
     assert_include_tag(target, 'textarea', name: 'job') { 'hexlet' }
-    assert_include_tag target, 'input', name: 'commit', type: 'submit', value: 'Save'
+    assert_include_tag target, 'input', name: 'commit', type: 'submit', value: 'It works!'
   end
 end
