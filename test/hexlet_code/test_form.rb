@@ -23,16 +23,5 @@ class TestForm < Minitest::Test
     assert_instance_of HexletCode::Controls::DataControl, form.controls.first
     assert_instance_of HexletCode::Controls::Control, form.controls[1]
     assert_instance_of HexletCode::Controls::TextControl, form.controls.last
-
-    target = HexletCode::Controls.create_control(**form.data)
-    assert { target.model[:name] == model.name }
-    assert { target.attributes == form_attrs }
-    assert { target.controls.count == 3 }
-    assert do
-      target.controls.first.data == { type: :test_control1, data: {
-        field_name: :name, field_value: nil, attributes: { control_attr1: :value1, control_attr2: :value2 }
-      } }
-    end
-    assert { target.controls.last.type == :test_control3 }
   end
 end
