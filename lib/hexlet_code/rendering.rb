@@ -5,33 +5,33 @@ module HexletCode
 
   module Rendering
     class << self
-      def register_control(control_name, builder)
-        check_builder builder
-        builders[control_name] = builder
+      def register_renderer(control_name, renderer)
+        check_renderer renderer
+        renderers[control_name] = renderer
       end
 
       def render_control(control)
-        builder = builders[control.type]
-        raise RenderError, "Unknown contril type: #{control.type}" unless builder
-        return builder.build(control) if builder.respond_to? :build
-        return builder.call(control) if builder.instance_of? Proc
+        renderer = renderers[control.type]
+        raise RenderError, "Unknown contril type: #{control.type}" unless renderer
+        return renderer.render(control) if renderer.respond_to? :render
+        return renderer.call(control) if renderer.instance_of? Proc
       end
 
-      def registred_controls
-        @builders.keys
+      def registred_renderers
+        @renderers.keys
       end
 
       private
 
-      def builders
-        @builders ||= {}
+      def renderers
+        @renderers ||= {}
       end
 
-      def check_builder(builder)
-        return if builder.is_a? Proc
-        return if builder.respond_to? :build
+      def check_renderer(render)
+        return if render.is_a? Proc
+        return if render.respond_to? :render
 
-        raise ArgumentError, 'Invalid builder. Use instance of Proc or object responsible to :build'
+        raise ArgumentError, 'Invalid render. Use instance of Proc or object responsible to :render'
       end
     end
   end

@@ -3,30 +3,30 @@
 require 'test_helper'
 
 class TestRenderer < Minitest::Test
-  def renderer
+  def rendering
     HexletCode::Rendering
   end
 
-  def test_renderer_accepts_proc
+  def test_rendering_accepts_proc
     control_name = :test_control
     control_render = 'test_control'
-    control_builder = proc { |_control_data| control_render }
-    renderer.register_control control_name, control_builder
-    target = renderer.render_control(HexletCode::Controls::Control.new(type: control_name))
+    renderer = proc { |_control_data| control_render }
+    rendering.register_renderer control_name, renderer
+    target = rendering.render_control(HexletCode::Controls::Control.new(type: control_name))
     assert { target == control_render }
   end
 
-  def test_renderer_accepts_build
+  def test_rendering_accepts_objects
     control_name = :test_control
     control_render = 'test_control2'
-    control_builder = Object.new
-    control_builder.define_singleton_method(:build) { |_control_data| control_render }
-    renderer.register_control control_name, control_builder
-    target = renderer.render_control(HexletCode::Controls::Control.new(type: control_name))
+    renderer = Object.new
+    renderer.define_singleton_method(:render) { |_control_data| control_render }
+    rendering.register_renderer control_name, renderer
+    target = rendering.render_control(HexletCode::Controls::Control.new(type: control_name))
     assert { target == control_render }
   end
 
-  def test_controls_builder_not_accepts_any
-    assert_raises(ArgumentError) { renderer.register_control :test, Object.new }
+  def test_controls_rendering_not_accepts_any
+    assert_raises(ArgumentError) { rendering.register_renderer :test, Object.new }
   end
 end

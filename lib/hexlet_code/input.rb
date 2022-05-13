@@ -6,7 +6,7 @@ module HexletCode
 
     private_constant :INPUTS_TYPES
 
-    Rendering.register_control(:input, proc do |control|
+    Rendering.register_renderer(:input, proc do |control|
       input_type = control.attributes.fetch :as, :default
       begin
         method_name = INPUTS_TYPES.fetch input_type

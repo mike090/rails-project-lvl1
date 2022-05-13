@@ -16,17 +16,21 @@ module HexletCode
 
   FORM_CONTROLS_KEY = '@controls'
 
-  def self.register_html_controls
-    HtmlControls.singleton_methods.each do |method_name|
-      Rendering.register_control method_name, (HtmlControls.method method_name).to_proc
+  class << self
+    def form_for(model, **attrs)
+      form = Form.new model, **attrs
+      yield form if block_given?
+      Rendering.render_control Controls.create_control(**form.data)
     end
-  end
 
-  def self.form_for(model, **attrs)
-    form = Form.new model, **attrs
-    yield form if block_given?
-    Rendering.render_control Controls.create_control(**form.data)
-  end
+    def register_html_controls
+      HtmlControls.singleton_methods.each do |method_name|
+        Rendering.register_renderer method_name, (HtmlControls.method method_name).to_proc
+      end
+    end
+
+    private :register_html_controls
+end
 
   register_html_controls
 end
