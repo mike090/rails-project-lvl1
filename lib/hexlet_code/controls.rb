@@ -4,9 +4,9 @@ module HexletCode
   module Controls
     class << self
       def load_control(**control_data)
-        data_keys = (control_data[:data] || {}).keys
-        control_loader = get_control_loader data_keys
-        raise ArgumentError, "Unknown control loader for keys: #{data_keys}" unless control_loader
+        control_type_key = control_data[:type]
+        control_loader = control_loaders[control_type_key]
+        raise ArgumentError, 'Unknown control loader ' unless control_loader
 
         control_loader.call(**control_data)
       end
@@ -19,11 +19,16 @@ module HexletCode
         control_fabric.call name, *args
       end
 
-      def register_control_loader(control_loader, *keys)
-        control_loaders[keys.sort.hash] = control_loader
+      def register_control(loader, loader_key, fabric, params_maps)
+        register_control_fabric fabric, params_maps
+        register_control_loader loader, loader_key
       end
 
-      def register_control_fabric(fabric, *params_maps)
+      def register_control_loader(loader, type_key)
+        control_loaders[type_key] = loader
+      end
+
+      def register_control_fabric(fabric, params_maps)
         params_maps.each do |params_map|
           if control_fabrics[params_map.hash]
             raise ArgumentError,
@@ -32,10 +37,6 @@ module HexletCode
 
           control_fabrics[params_map.hash] = fabric
         end
-      end
-
-      def get_control_loader(keys)
-        control_loaders[keys.sort.hash]
       end
 
       def get_control_fabric(params_map)
@@ -50,7 +51,8 @@ module HexletCode
         @control_fabrics ||= {}
       end
 
-      private :get_control_loader, :get_control_fabric, :control_loaders, :control_fabrics
+      private :get_control_fabric, :control_loaders, :control_fabrics, :register_control_loader,
+              :register_control_fabric
     end
 
     class Control
@@ -75,11 +77,10 @@ module HexletCode
 
         self.name = values[:name]
         @attributes = (values[:data] || {})[:attributes].dup || {}
-        # @data = self.class.data_class.new(**values[:data])
       end
 
       def to_h
-        { name: name, data: { attributes: @attributes.dup } }
+        { type: self.class.hash, name: name, data: { attributes: @attributes.dup } }
       end
     end
 
@@ -158,13 +159,13 @@ module HexletCode
       end
     end
 
-    register_control_fabric (Control.method :create_control).to_proc, *Control.params_maps
-    register_control_fabric (TextControl.method :create_control).to_proc, *TextControl.params_maps
-    register_control_fabric (DataControl.method :create_control).to_proc, *DataControl.params_maps
+    register_control_loader (FormControl.method :new).to_proc, FormControl.hash
 
-    register_control_loader (Control.method :new).to_proc, *Control.data_keys
-    register_control_loader (DataControl.method :new).to_proc, *DataControl.data_keys
-    register_control_loader (FormControl.method :new).to_proc, *FormControl.data_keys
-    register_control_loader (TextControl.method :new).to_proc, *TextControl.data_keys
+    register_control (Control.method :new).to_proc, Control.hash, (Control.method :create_control).to_proc,
+                     Control.params_maps
+    register_control (TextControl.method :new).to_proc, TextControl.hash, (TextControl.method :create_control).to_proc,
+                     TextControl.params_maps
+    register_control (DataControl.method :new).to_proc, DataControl.hash, (DataControl.method :create_control).to_proc,
+                     DataControl.params_maps
   end
 end

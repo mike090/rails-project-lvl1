@@ -9,7 +9,10 @@ class TestForm < Minitest::Test
 
   def test_empty_form_data
     form = HexletCode::Form.new model
-    assert { form.to_h == { name: :form, data: { model: {}, controls: [], attributes: {} } } }
+    assert do
+      form.to_h == { type: HexletCode::Controls::FormControl.hash, name: :form,
+                     data: { model: {}, controls: [], attributes: {} } }
+    end
   end
 
   def test_form_create
