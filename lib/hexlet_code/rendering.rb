@@ -11,8 +11,8 @@ module HexletCode
       end
 
       def render_control(control)
-        renderer = renderers[control.type]
-        raise RenderError, "Unknown contril type: #{control.type}" unless renderer
+        renderer = renderers[control.name]
+        raise RenderError, "Unknown contril name: #{control.name}" unless renderer
         return renderer.render(control) if renderer.respond_to? :render
         return renderer.call(control) if renderer.instance_of? Proc
       end

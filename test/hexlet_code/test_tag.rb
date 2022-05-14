@@ -27,12 +27,6 @@ class TestHexletCode < Minitest::Test
     assert block_flag, 'Block should be executed'
   end
 
-  def test_that_build_returns_closing_tag_if_block_given
-    tag_name = 'div'
-    target = HexletCode::Tag.build(tag_name) {} # rubocop:disable Lint/EmptyBlock
-    assert_end_with_closing_tag target, tag_name
-  end
-
   def test_closing_tag_absent
     target = HexletCode::Tag.build('img', src: '#', alt: 'image1')
     refute target.include?('</'), "Closing tag (</) should be absent in #{target}"
@@ -93,20 +87,9 @@ class TestHexletCode < Minitest::Test
   end
 
   def test_hexlet_n6
-    target = HexletCode::Tag.build('div') {} # rubocop:disable Lint/EmptyBlock
+    target = HexletCode::Tag.build('div')
     assert do
       target == '<div></div>'
     end
-  end
-
-  def test_build_tags_in_block
-    target = HexletCode::Tag.build 'div' do
-      HexletCode::Tag.build('h1') { 'title' }
-      HexletCode::Tag.build('p') { 'article text ' }
-    end
-    assert_start_with_opening_tag target, 'div'
-    assert_end_with_closing_tag target, 'div'
-    assert_include_tag(target, 'h1') { 'title' }
-    assert_include_tag(target, 'p') { 'article text' }
   end
 end

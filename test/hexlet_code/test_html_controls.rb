@@ -8,11 +8,11 @@ class TestHtmlControls < Minitest::Test
   end
 
   def data_control
-    @data_control ||= HexletCode::Controls::DataControl.new type: :control
+    @data_control ||= HexletCode::Controls::DataControl.new name: :control
   end
 
   def control
-    @control ||= HexletCode::Controls::Control.new type: :control
+    @control ||= HexletCode::Controls::Control.new name: :control
   end
 
   def test_label

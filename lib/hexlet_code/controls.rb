@@ -2,133 +2,169 @@
 
 module HexletCode
   module Controls
-    CONTROL_KEYS = %i[attributes].freeze
-    TEXT_KEYS = (%i[text] + CONTROL_KEYS).freeze
-    DATA_KEYS = (%i[field_name field_value] + CONTROL_KEYS).freeze
-    FORM_KEYS = (%i[model controls] + CONTROL_KEYS).freeze
+    class << self
+      def load_control(**control_data)
+        data_keys = (control_data[:data] || {}).keys
+        control_loader = get_control_loader data_keys
+        raise ArgumentError, "Unknown control loader for keys: #{data_keys}" unless control_loader
 
-    private_constant :CONTROL_KEYS, :DATA_KEYS, :FORM_KEYS, :TEXT_KEYS
+        control_loader.call(**control_data)
+      end
+
+      def create_control(name, *args)
+        params_map = args.map(&:class)
+        control_fabric = get_control_fabric params_map
+        raise ArgumentError, "Unknown control type with params map: #{params_map}" unless control_fabric
+
+        control_fabric.call name, *args
+      end
+
+      def register_control_loader(control_loader, *keys)
+        control_loaders[keys.sort.hash] = control_loader
+      end
+
+      def register_control_fabric(fabric, *params_maps)
+        params_maps.each do |params_map|
+          if control_fabrics[params_map.hash]
+            raise ArgumentError,
+                  "Control fabric for params map #{params_map} already registred"
+          end
+
+          control_fabrics[params_map.hash] = fabric
+        end
+      end
+
+      def get_control_loader(keys)
+        control_loaders[keys.sort.hash]
+      end
+
+      def get_control_fabric(params_map)
+        control_fabrics[params_map.hash]
+      end
+
+      def control_loaders
+        @control_loaders ||= {}
+      end
+
+      def control_fabrics
+        @control_fabrics ||= {}
+      end
+
+      private :get_control_loader, :get_control_fabric, :control_loaders, :control_fabrics
+    end
 
     class Control
-      extend Forwardable
-
-      def self.data_class
-        @data_class ||= Struct.new(*CONTROL_KEYS, keyword_init: true) do |_struct_class|
-          def to_h
-            super.tap { |result| result[:attributes] = result[:attributes].dup }
-          end
-
-          private :attributes=
-        end
+      def self.params_maps
+        [[], [Hash]]
       end
+
+      def self.data_keys
+        [:attributes]
+      end
+
+      def self.create_control(name, *args)
+        new(**{ name: name, data: { attributes: (args.first || {}) } })
+      end
+
+      attr_reader :attributes
+
+      attr_accessor :name
 
       def initialize(**values)
-        raise ArgumentError, 'Unknown control type' unless values[:type]
+        raise ArgumentError, 'Unknown control name' unless values[:name]
 
-        @type = values[:type]
-        data = values[:data] || {}
-        data = data.to_a.to_h
-        data[:attributes] = data[:attributes].dup || {}
-        @data = self.class.data_class.new(**data)
+        self.name = values[:name]
+        @attributes = (values[:data] || {})[:attributes].dup || {}
+        # @data = self.class.data_class.new(**values[:data])
       end
 
-      attr_reader :type
-
-      def data
-        { type: @type, data: @data.to_h }
+      def to_h
+        { name: name, data: { attributes: @attributes.dup } }
       end
-
-      def_delegators :@data,
-                     *(data_class.public_instance_methods - public_instance_methods)
-                       .grep(/#{data_class.members.join '|'}/)
-    end
-
-    class DataControl < Control
-      def self.data_class
-        @data_class ||= Struct.new(*DATA_KEYS, keyword_init: true) do |_struct_class|
-          def to_h
-            super.tap { |result| result[:attributes] = result[:attributes].dup }
-          end
-
-          private :attributes=
-        end
-      end
-
-      def_delegators :@data,
-                     *(data_class.public_instance_methods - public_instance_methods)
-                       .grep(/#{data_class.members.join '|'}/)
-    end
-
-    class FormControl < Control
-      def self.data_class
-        @data_class ||= Struct.new(*FORM_KEYS, keyword_init: true) do |_struct_class|
-          def to_h
-            super.tap do |result|
-              result[:model] = result[:model].dup
-              result[:controls] = result[:controls].map(&:data)
-            end
-          end
-
-          private :attributes=, :controls=, :model=
-        end
-      end
-
-      def initialize(**values)
-        type = values[:type] || :form
-        data = values[:data] || {}
-        model = data[:model].dup || {}
-        controls = (data[:controls] || []).map { |control_data| Controls.create_control(**control_data) }
-        attributes = data[:attributes]
-        super(**{ type: type, data: { attributes: attributes, model: model, controls: controls } })
-      end
-
-      def_delegators :@data,
-                     *(data_class.public_instance_methods - public_instance_methods)
-                       .grep(/#{data_class.members.join '|'}/)
     end
 
     class TextControl < Control
-      def self.data_class
-        @data_class ||= Struct.new(*TEXT_KEYS, keyword_init: true) do |_struct_class|
-          def to_h
-            super.tap { |result| result[:attributes] = result[:attributes].dup }
-          end
+      def self.params_maps
+        [[String], [String, Hash]]
+      end
 
-          private :attributes=
+      def self.create_control(name, *args)
+        new(**{ name: name, data: { text: args.first, attributes: (args[1] || {}) } })
+      end
+
+      def self.data_keys
+        superclass.data_keys << :text
+      end
+
+      attr_accessor :text
+
+      def initialize(**values)
+        super
+        @text = (values[:data] || {})[:text]
+      end
+
+      def to_h
+        super.tap { |result| result[:data].merge! text: @text }
+      end
+    end
+
+    class DataControl < Control
+      def self.params_maps
+        [[Symbol], [Symbol, Hash]]
+      end
+
+      def self.create_control(name, *args)
+        new(**{ name: name, data: { field_name: args.first, attributes: (args[1] || {}) } })
+      end
+
+      def self.data_keys
+        superclass.data_keys.concat %i[field_name field_value]
+      end
+
+      attr_accessor :field_name, :field_value
+
+      def initialize(**values)
+        super
+        @field_name = (values[:data] || {})[:field_name]
+        @field_value = (values[:data] || {})[:field_value]
+      end
+
+      def to_h
+        super.tap { |result| result[:data].merge! field_name: @field_name, field_value: @field_value }
+      end
+    end
+
+    class FormControl < Control
+      def self.data_keys
+        superclass.data_keys.concat %i[model controls]
+      end
+
+      attr_reader :model, :controls
+
+      def initialize(**values)
+        values[:name] ||= :form
+        super
+        @model = (values[:data] || {})[:model].dup || {}
+        @controls = ((values[:data] || {})[:controls] || []).map do |control_data|
+          Controls.load_control(**control_data)
         end
       end
 
-      def_delegators :@data,
-                     *(data_class.public_instance_methods - public_instance_methods)
-                       .grep(/#{data_class.members.join '|'}/)
+      def to_h
+        super.tap do |result|
+          result[:data][:model] = @model.dup
+          result[:data][:controls] = @controls.map(&:to_h)
+        end
+      end
     end
 
-    class << self
-      def create_control(**control_data)
-        control_class = get_control_class control_data[:data].keys
-        raise ArgumentError, "Unknown control class for keys: #{control_data[:data].keys}" unless control_class
+    register_control_fabric (Control.method :create_control).to_proc, *Control.params_maps
+    register_control_fabric (TextControl.method :create_control).to_proc, *TextControl.params_maps
+    register_control_fabric (DataControl.method :create_control).to_proc, *DataControl.params_maps
 
-        control_class.new(**control_data)
-      end
-
-      def register_control_class(control_class, *keys)
-        control_classes[keys.sort.hash] = control_class
-      end
-
-      def get_control_class(keys)
-        control_classes[keys.sort.hash]
-      end
-
-      def control_classes
-        @control_classes ||= {}
-      end
-
-      private :get_control_class, :control_classes
-    end
-
-    register_control_class Control, *CONTROL_KEYS
-    register_control_class DataControl, *DATA_KEYS
-    register_control_class FormControl, *FORM_KEYS
-    register_control_class TextControl, *TEXT_KEYS
+    register_control_loader (Control.method :new).to_proc, *Control.data_keys
+    register_control_loader (DataControl.method :new).to_proc, *DataControl.data_keys
+    register_control_loader (FormControl.method :new).to_proc, *FormControl.data_keys
+    register_control_loader (TextControl.method :new).to_proc, *TextControl.data_keys
   end
 end

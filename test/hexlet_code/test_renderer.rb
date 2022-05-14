@@ -12,7 +12,8 @@ class TestRenderer < Minitest::Test
     control_render = 'test_control'
     renderer = proc { |_control_data| control_render }
     rendering.register_renderer control_name, renderer
-    target = rendering.render_control(HexletCode::Controls::Control.new(type: control_name))
+    control = HexletCode::Controls.create_control control_name
+    target = rendering.render_control control
     assert { target == control_render }
   end
 
@@ -22,7 +23,7 @@ class TestRenderer < Minitest::Test
     renderer = Object.new
     renderer.define_singleton_method(:render) { |_control_data| control_render }
     rendering.register_renderer control_name, renderer
-    target = rendering.render_control(HexletCode::Controls::Control.new(type: control_name))
+    target = rendering.render_control(HexletCode::Controls.create_control(control_name))
     assert { target == control_render }
   end
 

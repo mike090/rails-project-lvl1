@@ -4,23 +4,20 @@ require_relative 'hexlet_code/version'
 
 module HexletCode
   autoload :Tag, 'hexlet_code/tag.rb'
+  autoload :Controls, 'hexlet_code/controls.rb'
   autoload :Form, 'hexlet_code/form.rb'
   autoload :Rendering, 'hexlet_code/rendering.rb'
-  autoload :HtmlControls, 'hexlet_code/html_controls.rb'
-  autoload :ControlData, 'hexlet_code/control.rb'
-  autoload :Controls, 'hexlet_code/controls.rb'
-  autoload :Forwardable, 'forwardable'
   autoload :Html, 'hexlet_code/html.rb'
+  autoload :HtmlControls, 'hexlet_code/html_controls.rb'
+  autoload :Forwardable, 'forwardable'
 
   require 'hexlet_code/input'
-
-  FORM_CONTROLS_KEY = '@controls'
 
   class << self
     def form_for(model, **attrs)
       form = Form.new model, **attrs
       yield form if block_given?
-      Rendering.render_control Controls.create_control(**form.data)
+      Rendering.render_control Controls.load_control(**form.save)
     end
 
     def register_html_controls
@@ -30,7 +27,7 @@ module HexletCode
     end
 
     private :register_html_controls
-end
+  end
 
   register_html_controls
 end
