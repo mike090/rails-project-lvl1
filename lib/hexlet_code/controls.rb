@@ -2,6 +2,11 @@
 
 module HexletCode
   module Controls
+    autoload :Control, 'hexlet_code/controls/control.rb'
+    autoload :DataControl, 'hexlet_code/controls/data_control.rb'
+    autoload :TextControl, 'hexlet_code/controls/text_control.rb'
+    autoload :FormControl, 'hexlet_code/controls/form_control.rb'
+
     class << self
       def create_control(name, *args)
         params_map = args.map(&:class)
@@ -25,24 +30,24 @@ module HexletCode
         @control_fabrics ||= {}
       end
 
-      private :get_control_fabric, :control_fabrics, :register_control_fabric
+      private :get_control_fabric, :control_fabrics
     end
 
     register_control(
-      Proc.new do |name, *args|
-        Controlnew(name, args.first)
+      proc do |name, *args|
+        Control.new name, **(args.first || {})
       end,
       [], [Hash]
     )
     register_control(
-      Proc.new do |name, *args|
-        TextControl.new(name, args.first, args[1])
+      proc do |name, *args|
+        TextControl.new name, args.first, **(args[1] || {})
       end,
       [String], [String, Hash]
     )
     register_control(
-      Proc.new do |name, *args|
-        DataControl.new(name, args.first, args[1])
+      proc do |name, *args|
+        DataControl.new name, args.first, **(args[1] || {})
       end,
       [Symbol], [Symbol, Hash]
     )

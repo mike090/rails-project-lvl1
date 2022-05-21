@@ -16,9 +16,7 @@ If bundler is not being used to manage dependencies, install the gem by executin
 
 ## Usage
 
-Гем является генератором форм и предоставляет для этого метод form_for, принимающий в качестве аргументов модель, атрибуты формы и блок, в который будет передан экземпляр класса HexletCode::Form в качестве аргумента. Этот объект используется для построения структуры будущей формы. Структура формы задается последовательным вызовом методов не объекте формы. Могут быть вызваны методы с любыми именами и следующими параметрами []|[String]|[Symbol], [_**attrs]. Имя метода будет именем нового контрола, а параметры и атрибуты, переданные аргументами, будут сохранены в структуре. Структура формы может быть получена с помощью методф save. Так же, по атрибуту controls доступны контролы, созданные на форме. Атрибут возвращает массив объектов класса HexletCode::Controls::Control (или его наследников). С помощью HexletCode::Controls.register_control можно регистрировать новые типы контролов. Для этого нужно передать следующие аргументы:
-* loader - экземпляр Proc, приниающий параметром Hash с сохраненным контролом и возвращающий контрол
-* loader_key - уникальный ключ лоадера
+Гем является генератором форм и предоставляет для этого метод form_for, принимающий в качестве аргументов модель, атрибуты формы и блок, в который будет передан экземпляр класса HexletCode::Form в качестве аргумента. Этот объект используется для построения структуры будущей формы. Структура формы задается последовательным вызовом методов не объекте формы. Могут быть вызваны методы с именами зарегистрированных рендеров и следующими параметрами []|[String]|[Symbol], [_**attrs]. Имя метода будет именем нового контрола, а параметры и атрибуты, переданные аргументами, будут сохранены в атрибудах контрола. Так же, по атрибуту controls доступны контролы, созданные на форме. Атрибут возвращает массив объектов класса HexletCode::Controls::Control (или его наследников). С помощью HexletCode::Controls.register_control можно регистрировать новые типы контролов. Для этого нужно передать следующие аргументы:
 * fabric - экземпляр Proc, принимающий параметры для создания контрола и возвращающий контрол
 * params_maps - массив шаблонов допустимых аргументов
 
@@ -26,8 +24,47 @@ If bundler is not being used to manage dependencies, install the gem by executin
 
 Примеры HTML рендеров можно найти в проекте.
 
+
 Основной целью было научиться построению гибкого, расширяемого приложения.
 Практической ценности этот гем не имеет.
+
+### Пример использования
+
+```ruby
+HexletCode::Rendering.register_renderer(:block,
+    Proc.new do |control| 
+        "<div class=\"d-flex\"><h4 classs=\"my-4 me-3\">#{control.text}</h4><hr class=\"my-auto w-100\"></div>"
+    end
+)
+
+User = Struct.new(:name, :job, :gender, keyword_init: true)
+user = User.new name: 'Rob', job: 'hexlet', gender: 'male'
+
+HexletCode.form_for user do |f|
+    f.block 'Person'
+    f.input :name
+    f.block 'Job'
+    f.input :job
+    f.submit
+end
+```
+```html
+<form method="post" action="#">
+    <div class="d-flex">
+        <h4 classs="my-4 me-3">Person</h4>
+        <hr class="my-auto w-100\">
+    </div>
+    <label for="name">Name</label>
+    <input type="text" name="name" value="Rob">
+    <div class="d-flex">
+        <h4 classs="my-4 me-3">Job</h4>
+        <hr class="my-auto w-100\">
+    </div>
+    <label for="job">Job</label>
+    <input type="text" name="job" value="hexlet">
+    <input name="commit" type="submit" value="Save">
+</form>
+```
 
 ## Development
 

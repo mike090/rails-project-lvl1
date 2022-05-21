@@ -46,4 +46,12 @@ class TestHexletCode < Minitest::Test
     assert_include_tag(target, 'textarea', name: 'job') { 'hexlet' }
     assert_include_tag target, 'input', name: 'commit', type: 'submit', value: 'It works!'
   end
+
+  def test_raises_if_field_absent
+    assert_raises(NoMethodError) do
+      HexletCode.form_for @user do |form|
+        form.input :age
+      end
+    end
+  end
 end

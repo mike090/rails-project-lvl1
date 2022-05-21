@@ -9,7 +9,6 @@ module HexletCode
   autoload :Rendering, 'hexlet_code/rendering.rb'
   autoload :Html, 'hexlet_code/html.rb'
   autoload :HtmlControls, 'hexlet_code/html_controls.rb'
-  autoload :Forwardable, 'forwardable'
 
   require 'hexlet_code/input'
 
@@ -17,7 +16,7 @@ module HexletCode
     def form_for(model, **attrs)
       form = Form.new model, **attrs
       yield form if block_given?
-      Rendering.render_control Controls.load_control(**form.save)
+      Rendering.render_control form
     end
 
     def register_html_controls

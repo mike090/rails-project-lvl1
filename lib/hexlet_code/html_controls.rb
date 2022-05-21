@@ -18,36 +18,23 @@ module HexletCode
       def text_input(control)
         attrs = control.attributes.merge type: :text
         attrs.delete :as
-        case control
-        when Controls::DataControl
-          attrs.merge! name: control.field_name
-          text = control.field_value
-        when Controls::TextControl
-          text = control.text
-        else
-          text = ''
-        end
+        attrs.merge! name: control.field_name
+        text = control.field_value
         Html.text_input text, **attrs
       end
 
       def textarea(control)
         attrs = { cols: 20, rows: 40 }.merge control.attributes
-        case control
-        when Controls::DataControl
-          attrs.merge! name: control.field_name
-          text = control.field_value
-        when Controls::TextControl
-          text = control.text
-        end
+        attrs.merge! name: control.field_name
+        text = control.field_value
         Html.textarea text, **attrs
       end
 
       def form(form)
         attrs = { method: :post }.merge form.attributes
         attrs[:action] = (attrs.delete :url) || '#'
-        # controls = form.controls.map
         form_content = form.controls.map do |control|
-          control.field_value = form.model[control.field_name] if control.instance_of? Controls::DataControl
+          control.field_value = form.model.public_send control.field_name if control.instance_of? Controls::DataControl
           Rendering.render_control control
         end
         Html.form form_content.join, **attrs

@@ -7,7 +7,7 @@ module HexletCode
         raise ArgumentError, 'Unknown control name' unless name
 
         @name = name
-        @attributes = attributes.dup || {}
+        @attributes = attributes || {}
       end
 
       attr_reader :attributes

@@ -2,7 +2,7 @@
 
 module HexletCode
   module Tag
-    VOID_TAGS = %w[area base br col command embed ht img input keygen link meta param source track wbr].freeze
+    VOID_TAGS = %w[area base br col command embed ht img input keygen link meta param source track wbr hr].freeze
 
     private_constant :VOID_TAGS
 

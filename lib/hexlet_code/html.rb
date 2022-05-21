@@ -22,6 +22,18 @@ module HexletCode
       def submit(caption, **attrs)
         Tag.build 'input', **attrs.merge(value: caption)
       end
+
+      def div(**attrs, &block)
+        Tag.build 'div', **attrs, &block
+      end
+
+      def h4(text, **attrs)
+        Tag.build('h4', **attrs) { text }
+      end
+
+      def hr(**attrs)
+        Tag.build 'hr', **attrs
+      end
     end
   end
 end

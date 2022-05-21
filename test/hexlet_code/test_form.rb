@@ -9,24 +9,20 @@ class TestForm < Minitest::Test
 
   def test_empty_form_data
     form = HexletCode::Form.new model
-    assert do
-      form.to_h == { type: HexletCode::Controls::FormControl.hash, name: :form,
-                     data: { model: {}, controls: [], attributes: {} } }
-    end
+    assert form.respond_to?(:submit)
+    assert form.respond_to?(:input)
   end
 
-  def test_form_create
+  def test_form_create_controls
     form = HexletCode::Form.new model, **{ form_attr1: :value1 }
-    form.test_control1 :name
-    form.test_control2
-    form.test_control3 'text'
-
+    form.label 'text'
+    form.text_input :name
+    form.submit
     assert form.controls.count == 3
   end
 
   def test_form_raises
     form = HexletCode::Form.new model, **{ form_attr1: :value1 }
-    form.input :age
-    assert_raises(NoMethodError) { form.to_h }
+    assert_raises(ArgumentError) { form.unregistred_control }
   end
 end

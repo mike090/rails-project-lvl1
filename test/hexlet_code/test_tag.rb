@@ -3,11 +3,6 @@
 require 'test_helper'
 
 class TestHexletCode < Minitest::Test
-  def test_build_return_string_result
-    target = HexletCode::Tag.build 'a'
-    assert_instance_of String, target, "#{target} must be a string"
-  end
-
   def test_build_raise_exception_if_tag_name_blank
     assert_raises(
       ArgumentError,

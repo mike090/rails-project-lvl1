@@ -1,11 +1,11 @@
-frozen_string_literal: true
+# frozen_string_literal: true
 
 module HexletCode
   module Controls
     class FormControl < Control
-      def initialize(model, attributes**)
+      def initialize(model, **attributes)
         super(:form, **attributes)
-        @model = model.dup || {}
+        @model = model
         @controls = []
       end
 
